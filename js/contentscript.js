@@ -39,7 +39,7 @@ function Delete_subtitle(search_title) {
     index = search_title.indexOf('―');
     if (index >= min_search_title_len)
         search_title = search_title.slice(0, index).trim();
-        
+
     index = search_title.indexOf('-');
     if (index >= min_search_title_len)
         search_title = search_title.slice(0, index).trim();
@@ -69,8 +69,8 @@ function Delete_subtitle(search_title) {
  *      EX:  ○◯◯◯ 第△版  =>  ◯◯◯◯
  */
 function Delete_edition(search_title) {
-   console.log("***** Delete edtion *****");
-   console.log(search_title);
+   trace("***** Delete edtion *****");
+   trace(search_title);
 
    search_title_split = search_title.split(' ');
    if (search_title_split.length > 1) {
@@ -87,8 +87,7 @@ function Delete_edition(search_title) {
    trace(search_title + '\n');
    return search_title;
 }
-
-/* 
+/*
  *    Delete other info
  *      EX:  ◯◯◯◯ 改訂版  =>  ◯◯◯◯
  *           図解 ◯◯◯◯   =>  ◯◯◯◯
@@ -229,28 +228,14 @@ function Add_dom(item_min_price, items_num, link_url) {
  *      At that　request.readystate == 4 && request.status == 200,
  *      Get items info by merukari search result and Add dom element to Amazon product page
  */
-function search_merukari(search_title, url) {
-    const request = new XMLHttpRequest();
-    request.open("GET", url);
-
-    request.addEventListener("load", (event) => {
-        if (event.target.status !== 200)
-            return;
-    });
-
-    request.addEventListener("error", () => {
-        trace("Network Error");
-    });
-
-    request.onreadystatechange = function () {
-        if (request.readyState == 4 && request.status == 200)　{
+function search_merukari(search_title, url){
+    chrome.runtime.sendMessage({search_title: search_title, url: url},
+        function (response_text) {
             var item_min_price, items_num;
-          　[item_min_price, items_num] = Get_items_info(search_title, request.responseText);
+            [item_min_price, items_num] = Get_items_info(search_title, response_text);
             if (item_min_price != null && items_num != null)
                 Add_dom(item_min_price, items_num, url);
-        }
-    }
-    request.send();
+        });
 }
 
 /*
